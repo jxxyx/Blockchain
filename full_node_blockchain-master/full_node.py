@@ -58,21 +58,25 @@ def sync_data():
             start = head['index']+1 if head else 0
             while True:
                 logger.info(url, {"from_block":start, "limit":20})
-                res = requests.get(url, params={"from_block":start, "limit":20})
-                if res.status_code == 200:
-                    data = res.json()
-                    if not data:
-                        break
-                    sync_running = True
-                    for block in data:
-                        try:
-                            bc.add_block(block)
-                        except Exception as e:
-                            logger.exception(e)
-                            return
-                        else:
-                            logger.info(f"Block added: #{block['index']}")
-                    start += 20
+                try:
+                    res = requests.get(url, params={"from_block":start, "limit":20})
+                    if res.status_code == 200:
+                        data = res.json()
+                        if not data:
+                            break
+                        sync_running = True
+                        for block in data:
+                            try:
+                                bc.add_block(block)
+                            except Exception as e:
+                                logger.exception(e)
+                                return
+                            else:
+                                logger.info(f"Block added: #{block['index']}")
+                        start += 20
+                except Exception as e:
+                    logger.error(f"Sync issue: {str(e)}")
+                    return
 
             head = bc.get_head()
         if not sync_running:
@@ -324,4 +328,4 @@ if __name__ == "__main__":
     if not args.node:
         _BC.create_first_block()
 
-    uvicorn.run(app, host="127.0.0.1", port=args.port, access_log=True)
+    uvicorn.run(app, host="0.0.0.0", port=args.port, access_log=True)

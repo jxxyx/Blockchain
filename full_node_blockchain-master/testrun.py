@@ -4,10 +4,12 @@ import time
 from blockchain.wallet import Wallet
 from blockchain.blocks import Input, Output, Tx
 
+pis = [('172.18.4.99', 8000), ()]
+
 while True:
-    for port in [8001,8002,8000]:
+    for ip, port in pis:
         try:
-            print(requests.get(f"http://127.0.0.1:{port}/chain/status").json()['block_hash'])
+            print(requests.get(f"http://{ip}:{port}/chain/status").json()['block_hash'])
         except:
             pass
     print('===============================================================')

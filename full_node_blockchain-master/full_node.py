@@ -1,3 +1,4 @@
+from ast import literal_eval
 from fastapi import FastAPI, BackgroundTasks, Request
 import uvicorn
 import requests
@@ -58,21 +59,25 @@ def sync_data():
             start = head['index']+1 if head else 0
             while True:
                 logger.info(url, {"from_block":start, "limit":20})
-                res = requests.get(url, params={"from_block":start, "limit":20})
-                if res.status_code == 200:
-                    data = res.json()
-                    if not data:
-                        break
-                    sync_running = True
-                    for block in data:
-                        try:
-                            bc.add_block(block)
-                        except Exception as e:
-                            logger.exception(e)
-                            return
-                        else:
-                            logger.info(f"Block added: #{block['index']}")
-                    start += 20
+                try:
+                    res = requests.get(url, params={"from_block":start, "limit":20})
+                    if res.status_code == 200:
+                        data = res.json()
+                        if not data:
+                            break
+                        sync_running = True
+                        for block in data:
+                            try:
+                                bc.add_block(block)
+                            except Exception as e:
+                                logger.exception(e)
+                                return
+                            else:
+                                logger.info(f"Block added: #{block['index']}")
+                        start += 20
+                except Exception as e:
+                    logger.error(f"Sync issue: {str(e)}")
+                    return
 
             head = bc.get_head()
         if not sync_running:
@@ -274,6 +279,19 @@ async def on_startup():
     if app.config['mine']:
         app.jobs['mining'] = asyncio.Event()
         loop.run_in_executor(None, mine, app.jobs['mining'])
+    for node_address in known_nodes:
+        try:
+            response = requests.post(
+                f"{node_address}/server/add_nodes",
+                json={"nodes": [f"http://{args.host}:{args.port}"]},
+                timeout=2
+            )
+            if response.status_code == 200:
+                logger.info(f"Successfully registered with node {node_address}")
+            else:
+                logger.error(f"Failed to register with node {node_address}, status code {response.status_code}")
+        except Exception as e:
+            logger.error(f"Exception occurred when registering with node {node_address}: {str(e)}")
     
 @app.on_event("shutdown")
 async def on_shutdown():
@@ -302,8 +320,13 @@ if __name__ == "__main__":
     parser.add_argument('--port', required=True, type=int, help='Port on which run the node.')
     parser.add_argument('--mine', required=False, type=bool, help='Port on which run the node.')
     parser.add_argument('--diff', required=False, type=int, help='Difficulty')
+    parser.add_argument('--host', default='172.18.4.99', type=str, help='Host IP address to run the node on.')
+    parser.add_argument('--known-nodes', type=str, default='[]', help='List of known node addresses to connect to, e.g., ["http://192.168.1.2:8000"].')
+
+
 
     args = parser.parse_args()
+    known_nodes = literal_eval(args.known_nodes)
     _DB = DB()
     _DB.config['difficulty']
     _W = Wallet.create()
@@ -316,7 +339,7 @@ if __name__ == "__main__":
     app.config['bc'] = _BC
     app.config['api'] = _API
     app.config['port'] = args.port  
-    app.config['host'] = '127.0.0.1'
+    app.config['host'] = '172.18.4.99'
     app.config['nodes'] = set([args.node]) if args.node else set(['127.0.0.1:%s' % args.port])
     app.config['sync_running'] = False
     app.config['mine'] = args.mine
@@ -324,4 +347,4 @@ if __name__ == "__main__":
     if not args.node:
         _BC.create_first_block()
 
-    uvicorn.run(app, host="127.0.0.1", port=args.port, access_log=True)
+    uvicorn.run(app, host=args.host, port=args.port, access_log=True)

@@ -4,6 +4,47 @@ from merkletools import MerkleTools
 
 from .wallet import Address
 
+"""
+This module defines the fundamental components of a blockchain: Inputs, Outputs, Transactions (Tx), and Blocks.
+
+Classes:
+    Input:
+        Represents an input in a transaction, which references a previous transaction's output. It includes
+        a signature mechanism to prove ownership of the funds.
+
+    Output:
+        Represents an output in a transaction, indicating the amount of currency and the recipient's address.
+        Each output is uniquely identified by a hash.
+
+    Tx:
+        Encapsulates a transaction, consisting of inputs and outputs. Each transaction has a unique hash and a timestamp.
+
+    Block:
+        Represents a single block in the blockchain, containing a list of transactions. It has a unique hash,
+        is linked to the previous block by its hash, and includes a nonce for Proof of Work. The transactions
+        within the block are summarized by a Merkle root.
+
+Functions:
+    Input.sign(wallet):
+        Signs the input with a wallet, providing a cryptographic proof of ownership.
+
+    Output.hash:
+        Calculates and returns the hash of the output, creating a unique identifier for it.
+
+    Tx.hash:
+        Generates a unique hash for the transaction based on its contents and timestamp.
+
+    Block.build_merkel_tree():
+        Builds a Merkle tree from the transaction hashes within the block to quickly verify the block's contents.
+
+Usage:
+    These classes are instantiated and manipulated by the blockchain system to record, verify, and process transactions.
+
+Note:
+    The classes depend on external libraries such as `hashlib` for hashing and `merkletools` for Merkle tree generation.
+    `wallet.Address` is used to represent cryptocurrency addresses.
+"""
+
 
 class Input:
     __slots__ = 'prev_tx_hash', 'output_index', 'signature', '_hash', 'address', 'index', 'amount'

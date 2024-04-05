@@ -9,6 +9,38 @@ from .wallet import Wallet
 from .verifiers import TxVerifier
 from .db import DB
 
+"""
+This test suite validates the functionality of various blockchain components including transactions, blockchains,
+wallets, and database rollbacks.
+
+Tests:
+    test_tx_verifier():
+        Tests the transaction verification process. It ensures that a transaction with valid inputs and outputs
+        passes verification and that transactions with insufficient funds or with inputs signed by the wrong wallet
+        raise appropriate exceptions.
+
+    test_rollback(num_wallets=2, loops=5):
+        Tests the blockchain's ability to rollback transactions and revert to a previous state.
+        This test creates transactions, adds them to the blockchain, and then rolls back a number of blocks.
+        It then asserts that the database state matches the expected state after rollback.
+
+    test_split_brain():
+        Tests the blockchain's behavior in a split brain scenario, where two different blocks are mined simultaneously
+        on separate instances of the blockchain (simulating a network partition).
+        It then tests that when the split brain is resolved, the blockchain with the longer chain takes precedence,
+        and the other chain rolls back to the correct state.
+
+Each test initializes its own instances of wallets and blockchains, and manipulates transactions and blocks to
+verify the integrity and expected behavior of the blockchain under different conditions.
+
+Usage:
+    The tests should be run using a test runner that supports pytest.
+    They depend on the internal blockchain, wallet, verifier, and database components being correctly implemented.
+
+Note:
+    The tests may need to be updated if there are changes to the internal APIs of the blockchain components they are testing.
+"""
+
 
 def test_tx_verifier():
     w = Wallet.create()

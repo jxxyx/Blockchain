@@ -12,6 +12,89 @@ from blockchain.wallet import Wallet
 from blockchain.api import API
 from blockchain.blocks import Input, Output, Tx
 
+"""
+A blockchain full node implementation using FastAPI framework to manage the node operations via HTTP API calls.
+This node can mine new blocks, handle transactions, sync blockchain data with other nodes, and manage network peers.
+
+Functions:
+    sync_data() -> None:
+        Synchronizes blockchain data with other nodes in the network.
+
+    broadcast(path: str, data: dict, params: bool, fiter_host: str) -> None:
+        Broadcasts data to all other nodes in the network except the sender node to avoid broadcast loops.
+
+    mine(event: asyncio.Event) -> None:
+        Continuously mines new blocks until stopped by setting the event.
+
+FastAPI Endpoints:
+    /chain/stop-mining: 
+        Stops the mining process if it's currently running.
+
+    /chain/start-mining:
+        Starts the mining process if it's not already running.
+
+    /server/nodes:
+        Returns a list of known nodes in the network.
+
+    /server/add_nodes:
+        Adds new nodes to the network and broadcasts the new list of nodes.
+
+    /demo/send_amount:
+        Sends a specified amount of coins from the server's wallet to another wallet.
+
+    /chain/get_amount:
+        Retrieves the balance for a given wallet address.
+
+    /chain/get_unspent_tx:
+        Fetches unspent transactions for a given wallet address.
+
+    /chain/status:
+        Provides the current status of the node, including the latest block hash and index.
+
+    /chain/sync:
+        Serves a range of blocks for syncing purposes to other nodes.
+
+    /chain/add_block:
+        Adds a new block to the blockchain and broadcasts it to other nodes.
+
+    /chain/tx_create:
+        Adds a new transaction to the transaction pool and broadcasts it to other nodes.
+
+Startup and Shutdown Events:
+    on_startup():
+        Sets up the node, syncs blockchain data, broadcasts the node address, and starts mining if configured.
+
+    on_shutdown():
+        Properly stops the mining process if it's running.
+
+Utility Functions:
+    restart_miner() -> None:
+        Restarts the mining process.
+
+Command-line Arguments:
+    --node:
+        Address of node to connect to the network.
+        
+    --port:
+        Port on which the node runs.
+        
+    --mine:
+        Flag to indicate whether the node should mine new blocks.
+        
+    --diff:
+        The mining difficulty setting.
+        
+    --ip:
+        The IP address on which to run the node.
+
+Logging:
+    Custom logging with color formatting for better visibility during development and troubleshooting.
+    
+Main Execution:
+    The script sets up the node configuration and starts the FastAPI server when run as the main module.
+"""
+
+
 # Custom formatter
 class ColorFormatter(logging.Formatter):
 

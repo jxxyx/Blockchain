@@ -2,6 +2,61 @@ from .blocks import Block, Tx, Input, Output
 from .verifiers import TxVerifier, BlockOutOfChain, BlockVerifier, BlockVerificationFailed
 import logging
 
+"""
+A Blockchain class that encapsulates the logic for managing a blockchain instance, including block creation,
+transaction processing, mining, and chain synchronization.
+
+Attributes:
+    max_nonce (int): The maximum value for nonce in the Proof of Work algorithm.
+    chain (list): A list of mined blocks that forms the current blockchain.
+    unconfirmed_transactions (set): A set of transactions that have been verified but not yet included in a block.
+    db (DB): An instance of the DB class that represents the current blockchain's state.
+    wallet (Wallet): The wallet associated with the node running this blockchain instance.
+    on_new_block (callable): An optional callback function to be executed when a new block is added.
+    on_prev_block (callable): An optional callback function to be executed when a block is rolled back.
+    current_block_transactions (set): A set of transactions that are being processed in the current block.
+    fork_blocks (dict): A dictionary of blocks that represent alternative chains due to forks.
+
+Methods:
+    create_first_block(self):
+        Creates the genesis block for the blockchain with a COINBASE transaction.
+
+    create_coinbase_tx(self, fee=0):
+        Creates a COINBASE transaction that rewards the miner.
+
+    is_valid_block(self, block):
+        Validates a block by checking its consistency with the previous block and the current blockchain state.
+
+    add_block(self, block):
+        Attempts to add a block to the blockchain, handling duplicate, out-of-chain, and forked blocks.
+
+    add_tx(self, tx):
+        Adds a new transaction to the pool of unconfirmed transactions if it hasn't been processed yet.
+
+    force_block(self, check_stop=None):
+        Forces the creation of a block, prioritizing transactions with higher fees.
+
+    rollover_block(self, block):
+        Updates the blockchain state to include the transactions from the newly mined block.
+
+    rollback_block(self):
+        Reverts the last block from the chain, restoring the blockchain state to its previous condition.
+
+    mine_block(self, block, check_stop=None):
+        Mines a block using a Proof of Work algorithm with an optional stopping condition.
+
+Properties:
+    head (Block): Returns the latest block in the blockchain.
+
+    blockchain (list): Returns a list representation of the entire blockchain.
+
+Usage:
+    Instantiate a Blockchain object to manage the blockchain's operations. This class relies on other components
+    such as the Wallet for address generation and signing, and DB for the underlying data persistence.
+"""
+
+
+
 logger = logging.getLogger('Blockchain')
 
 
